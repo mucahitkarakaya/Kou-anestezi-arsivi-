@@ -1,342 +1,656 @@
 <!DOCTYPE html>
-<html lang="tr" class="dark">
+<html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KOÜ Anestezi Dijital Arşiv | Akademik Kaynak Portalı</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            display: ['Plus Jakarta Sans', 'sans-serif'],
-          },
-          colors: {
-            clinical: {
-              950: '#090e1a',
-              900: '#0f172a',
-              850: '#141e33',
-              800: '#1e293b',
-              700: '#334155',
-            },
-            medical: {
-              500: '#14b8a6',
-              600: '#0d9488',
-              700: '#0f766e',
-            }
-          }
-        }
-      }
-    }
-  </script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KOÜ Anestezi Dijital Arşiv Portalı</title>
   <style>
-    /* Özel Kaydırma Çubuğu */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(148, 163, 184, 0.25);
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(20, 184, 166, 0.5);
+    :root {
+      --bg-main: #0b1120;
+      --bg-sidebar: #111827;
+      --bg-card: #1e293b;
+      --bg-card-hover: #263349;
+      --bg-input: #0f172a;
+      --border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #0d9488;
+      --accent-hover: #0f766e;
+      --accent-soft: rgba(13, 148, 136, 0.15);
+      --blue: #3b82f6;
+      --purple: #a855f7;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
     }
 
-    /* Yumuşak Geçişler */
-    .fade-in {
-      animation: fadeIn 0.22s ease-out forwards;
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg-main); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px; background: var(--bg-sidebar); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; flex-shrink: 0; transition: transform 0.25s ease;
+      position: sticky; top: 0; height: 100vh; z-index: 50;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+    .brand { padding: 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+    .brand-icon {
+      width: 38px; height: 38px; border-radius: 10px; background: var(--accent);
+      display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; color: #fff; flex-shrink: 0;
+    }
+    .brand-text h1 { font-size: 0.95rem; font-weight: 700; line-height: 1.2; }
+    .brand-text p { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+
+    .nav-list { padding: 0.75rem; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.35rem; }
+    .nav-item {
+      width: 100%; text-align: left; background: transparent; border: 1px solid transparent;
+      color: var(--text-muted); padding: 0.7rem 0.85rem; border-radius: 8px; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; font-weight: 500;
+      transition: all 0.15s;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text-main); }
+    .nav-item.active { background: var(--accent-soft); color: #2dd4bf; border-color: rgba(45, 212, 191, 0.3); font-weight: 600; }
+    .nav-left { display: flex; align-items: center; gap: 0.6rem; overflow: hidden; }
+    .nav-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .badge { font-size: 0.7rem; background: var(--bg-card); color: var(--text-muted); padding: 2px 7px; border-radius: 99px; }
+
+    .sidebar-footer { padding: 0.85rem; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .btn-sm {
+      background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main);
+      padding: 0.55rem; border-radius: 7px; font-size: 0.75rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 0.35rem;
+    }
+    .btn-sm:hover { background: var(--bg-card-hover); }
+
+    /* Main Content */
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar {
+      background: rgba(17, 24, 39, 0.9); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border);
+      padding: 0.85rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; position: sticky; top: 0; z-index: 30;
+    }
+    .menu-btn {
+      display: none; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main);
+      padding: 0.5rem 0.65rem; border-radius: 8px; cursor: pointer; font-size: 1.1rem;
+    }
+    .search-box { flex: 1; position: relative; }
+    .search-box input {
+      width: 100%; background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main);
+      padding: 0.6rem 0.9rem; border-radius: 8px; font-size: 0.85rem; outline: none;
+    }
+    .search-box input:focus { border-color: var(--accent); }
+    .btn-primary {
+      background: var(--accent); border: none; color: #fff; padding: 0.6rem 1rem; border-radius: 8px;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 0.4rem;
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    .container { padding: 1.5rem; max-width: 1200px; width: 100%; margin: 0 auto; flex: 1; }
+    .header-box { margin-bottom: 1.25rem; }
+    .header-box h2 { font-size: 1.35rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+    .header-box p { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .tab {
+      background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted);
+      padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+    }
+    .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* Grids & Cards */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.9rem; }
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem;
+      transition: transform 0.15s, border-color 0.15s; display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .card.clickable { cursor: pointer; }
+    .card.clickable:hover { border-color: var(--accent); transform: translateY(-2px); background: var(--bg-card-hover); }
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.6rem; }
+    .card-title { font-size: 0.95rem; font-weight: 600; color: var(--text-main); line-height: 1.35; }
+    .tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 6px; font-weight: 600; background: var(--accent-soft); color: #2dd4bf; white-space: nowrap; }
+    .card-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.45; margin-bottom: 0.85rem; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 0.65rem; border-top: 1px solid rgba(51,65,85,0.6); font-size: 0.75rem; color: var(--text-muted); }
+    .link-btn { color: #2dd4bf; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+    .link-btn:hover { text-decoration: underline; }
+    .del-btn { background: none; border: none; color: #f43f5e; cursor: pointer; font-size: 0.75rem; opacity: 0.8; }
+    .del-btn:hover { opacity: 1; text-decoration: underline; }
+
+    .back-btn {
+      background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main);
+      padding: 0.45rem 0.85rem; border-radius: 7px; font-size: 0.8rem; cursor: pointer; margin-bottom: 1rem; display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+
+    /* Info Box (01 Yönerge) */
+    .info-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; line-height: 1.6; }
+    .info-panel h3 { color: #2dd4bf; font-size: 1.05rem; margin-bottom: 0.5rem; }
+    .info-panel ul { padding-left: 1.25rem; color: var(--text-muted); font-size: 0.88rem; margin-top: 0.5rem; }
+    .info-panel li { margin-bottom: 0.4rem; }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center;
+      justify-content: center; padding: 1rem; z-index: 100;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--bg-sidebar); border: 1px solid var(--border); border-radius: 12px;
+      width: 100%; max-width: 480px; padding: 1.25rem; max-height: 90vh; overflow-y: auto;
+    }
+    .modal h3 { font-size: 1.1rem; margin-bottom: 1rem; }
+    .form-group { margin-bottom: 0.85rem; }
+    .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main);
+      padding: 0.6rem 0.75rem; border-radius: 7px; font-size: 0.85rem;
+    }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1rem; }
+
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 40; }
+    .overlay.show { display: block; }
+
+    footer { text-align: center; padding: 1rem; font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border); }
+
+    @media (max-width: 768px) {
+      .sidebar { position: fixed; left: 0; top: 0; transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .menu-btn { display: inline-flex; }
+      .container { padding: 1rem; }
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-clinical-950 dark:text-slate-100 antialiased selection:bg-teal-500 selection:text-white transition-colors duration-200">
+<body>
 
-  <!-- Bildirim (Toast) Alanı -->
-  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+  <div class="overlay" id="overlay" onclick="toggleSidebar(false)"></div>
 
-  <!-- Ana Düzen Kapsayıcısı -->
-  <div class="min-h-screen flex flex-col lg:flex-row">
-
-    <!-- Mobil Üst Menü Arka Plan Karartması -->
-    <div id="sidebar-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-30 hidden lg:hidden"></div>
-
-    <!-- SOL KENAR ÇUBUĞU (SIDEBAR) -->
-    <aside id="sidebar" class="fixed lg:sticky top-0 left-0 z-40 h-screen w-72 bg-white dark:bg-clinical-900 border-r border-slate-200 dark:border-slate-800/80 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0 shrink-0">
-      
-      <!-- Marka / Başlık Alanı -->
-      <div class="p-5 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white shadow-lg shadow-teal-500/20 shrink-0">
-            <i data-lucide="activity" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <span class="text-[11px] font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 block">KOÜ MYO</span>
-            <h1 class="font-display font-bold text-base leading-tight text-slate-900 dark:text-white">Anestezi Arşiv</h1>
-          </div>
-        </div>
-        <button onclick="toggleSidebar(false)" class="lg:hidden p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <!-- Klasör Hiyerarşisi Navigasyonu -->
-      <div class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-        <div class="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-          <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>
-          <span>Arşiv Klasör Yapısı</span>
-        </div>
-
-        <button onclick="switchTab('01')" data-nav="01" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
-          <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 nav-badge">01</span>
-          <div class="truncate">
-            <div class="truncate font-semibold">Arşiv Hakkında ve Yönerge</div>
-            <div class="text-[11px] opacity-70 truncate">01_Arsiv_Hakkinda_ve_Yonerge</div>
-          </div>
-        </button>
-
-        <button onclick="switchTab('02')" data-nav="02" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
-          <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 nav-badge">02</span>
-          <div class="truncate">
-            <div class="truncate font-semibold">Anestezi Soru Havuzu</div>
-            <div class="text-[11px] opacity-70 truncate">02_Anestezi_Soru_Havuzu</div>
-          </div>
-        </button>
-
-        <button onclick="switchTab('03')" data-nav="03" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
-          <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 nav-badge">03</span>
-          <div class="truncate">
-            <div class="truncate font-semibold">Ders Notları ve Özetler</div>
-            <div class="text-[11px] opacity-70 truncate">03_Ders_Notlari_ve_Ozetler</div>
-          </div>
-        </button>
-
-        <button onclick="switchTab('04')" data-nav="04" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
-          <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 nav-badge">04</span>
-          <div class="truncate">
-            <div class="truncate font-semibold">Klinik Vaka Havuzu</div>
-            <div class="text-[11px] opacity-70 truncate">04_Klinik_Vaka_Havuzu</div>
-          </div>
-        </button>
-
-        <button onclick="switchTab('05')" data-nav="05" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
-          <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 nav-badge">05</span>
-          <div class="truncate">
-            <div class="truncate font-semibold">Görsel Arşiv & Medya</div>
-            <div class="text-[11px] opacity-70 truncate">05_Gorsel_Arsiv</div>
-          </div>
-        </button>
-      </div>
-
-      <!-- Alt Veri Yönetimi / Yedekleme Paneli -->
-      <div class="p-4 border-t border-slate-200 dark:border-slate-800/80 space-y-2.5 bg-slate-50/50 dark:bg-clinical-950/40">
-        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center justify-between">
-          <span>Editör Veri Yönetimi</span>
-          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500" title="Tarayıcı Hafızası Aktif"></span>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <button onclick="exportData()" class="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-medium bg-white dark:bg-clinical-800 border border-slate-200 dark:border-slate-700 hover:border-teal-500 dark:hover:border-teal-500 transition-colors" title="Tüm eklenen içerikleri JSON olarak indir">
-            <i data-lucide="download" class="w-3.5 h-3.5 text-teal-500"></i>
-            <span>Yedekle</span>
-          </button>
-          <label class="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-medium bg-white dark:bg-clinical-800 border border-slate-200 dark:border-slate-700 hover:border-cyan-500 dark:hover:border-cyan-500 transition-colors cursor-pointer" title="JSON yedek dosyasını yükle">
-            <i data-lucide="upload" class="w-3.5 h-3.5 text-cyan-500"></i>
-            <span>Yükle</span>
-            <input type="file" id="import-file" accept=".json" onchange="importData(event)" class="hidden" />
-          </label>
-        </div>
-      </div>
-    </aside>
-
-    <!-- SAĞ ANA İÇERİK ALANI -->
-    <div class="flex-1 flex flex-col min-w-0">
-
-      <!-- ÜST HEADER BAR -->
-      <header class="sticky top-0 z-20 bg-white/85 dark:bg-clinical-900/85 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 px-4 sm:px-6 py-3.5">
-        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-          
-          <!-- Sol: Mobil Menü Butonu & Global Arama -->
-          <div class="flex items-center gap-3 flex-1 min-w-[220px]">
-            <button onclick="toggleSidebar(true)" class="lg:hidden p-2.5 rounded-xl bg-slate-100 dark:bg-clinical-800 text-slate-700 dark:text-slate-200">
-              <i data-lucide="menu" class="w-5 h-5"></i>
-            </button>
-
-            <div class="relative flex-1 max-w-md">
-              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-              <input 
-                type="text" 
-                id="global-search" 
-                oninput="handleGlobalSearch(this.value)"
-                placeholder="Ders, çıkmış soru, vaka, cihaz veya açıklama ara..." 
-                class="w-full pl-10 pr-8 py-2 rounded-xl text-sm bg-slate-100 dark:bg-clinical-850 border border-transparent focus:border-teal-500 dark:focus:border-teal-500 focus:bg-white dark:focus:bg-clinical-800 outline-none transition-all placeholder:text-slate-400"
-              />
-              <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white">
-                <i data-lucide="x-circle" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </div>
-
-          <!-- Sağ: Hızlı Ekle & Tema Değiştirici -->
-          <div class="flex items-center gap-2.5">
-            <button onclick="openAddModal()" class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white shadow-md shadow-teal-600/20 transition-all active:scale-[0.98]">
-              <i data-lucide="plus-circle" class="w-4 h-4"></i>
-              <span>İçerik Ekle</span>
-            </button>
-
-            <button onclick="toggleTheme()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-clinical-800 text-slate-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400 border border-slate-200/70 dark:border-slate-700/70 transition-colors" title="Karanlık / Aydınlık Mod">
-              <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
-              <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <!-- DİNAMİK SAYFA İÇERİĞİ -->
-      <main id="main-content" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        <!-- İçerik JavaScript ile render edilir -->
-      </main>
-
-      <!-- FOOTER -->
-      <footer class="border-t border-slate-200 dark:border-slate-800/70 py-5 px-6 text-center sm:text-left">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
-          <p><strong class="text-slate-700 dark:text-slate-300">Kocaeli Üniversitesi Anestezi Dijital Arşivi</strong> • Akademik Dayanışma ve Kurumsal Hafıza Platformu</p>
-          <p class="flex items-center gap-1.5">
-            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-teal-500"></i>
-            <span>KVKK Uyumlu • Hasta Verileri Tamamen Anonimleştirilmiştir</span>
-          </p>
-        </div>
-      </footer>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- MODAL 1: DERS DETAY ÇEKMECESİ / MODALI (Soru Havuzu & Ders Notları)    -->
-  <!-- ===================================================================== -->
-  <div id="course-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
-    <div class="bg-white dark:bg-clinical-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl w-full max-w-3xl max-h-[88vh] flex flex-col shadow-2xl fade-in">
-      <!-- Modal Üst -->
-      <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-start justify-between gap-4">
-        <div>
-          <div class="flex items-center gap-2 mb-1">
-            <span id="cm-badge-type" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-teal-500/10 text-teal-600 dark:text-teal-400">Soru Havuzu</span>
-            <span id="cm-badge-year" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-clinical-800 text-slate-600 dark:text-slate-300">1. Sınıf</span>
-          </div>
-          <h3 id="cm-title" class="font-display font-bold text-xl text-slate-900 dark:text-white">Ders Adı</h3>
-          <p id="cm-subtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kayıtlı dökümanlar, çıkmış sorular ve çalışma bağlantıları</p>
-        </div>
-        <button onclick="closeModal('course-modal')" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-clinical-800 hover:text-slate-700 dark:hover:text-white transition-colors">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <!-- Modal Liste İçeriği -->
-      <div id="cm-list" class="p-5 overflow-y-auto flex-1 space-y-3">
-        <!-- Kayıtlar dinamik olarak buraya gelir -->
-      </div>
-
-      <!-- Modal Alt -->
-      <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-clinical-950/50 rounded-b-2xl flex items-center justify-between gap-3">
-        <span id="cm-count" class="text-xs font-medium text-slate-500 dark:text-slate-400">0 kayıt listeleniyor</span>
-        <button id="cm-add-btn" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-500 text-white transition-colors">
-          <i data-lucide="plus" class="w-4 h-4"></i>
-          <span>Bu Derse Kaynak Ekle</span>
-        </button>
+  <!-- Sol Menü (Drive Klasör Yapısı) -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">KOÜ</div>
+      <div class="brand-text">
+        <h1>Anestezi Dijital Arşivi</h1>
+        <p>SHMYO • Kurumsal Hafıza</p>
       </div>
     </div>
-  </div>
 
-  <!-- ===================================================================== -->
-  <!-- MODAL 2: YENİ İÇERİK EKLEME MODALI (Tüm Bölümler İçin Akıllı Form)    -->
-  <!-- ===================================================================== -->
-  <div id="add-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-xs">
-    <div class="bg-white dark:bg-clinical-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl fade-in">
-      <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center">
-            <i data-lucide="folder-plus" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white">Arşive Yeni İçerik Ekle</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Drive linki, soru bankası, klinik vaka veya görsel/video ekleyin</p>
-          </div>
-        </div>
-        <button onclick="closeModal('add-modal')" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-clinical-800">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
+    <nav class="nav-list" id="navList"></nav>
 
-      <form id="add-form" onsubmit="handleFormSubmit(event)" class="p-5 overflow-y-auto flex-1 space-y-4">
-        <!-- Hedef Klasör Seçimi -->
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Hedef Arşiv Klasörü</label>
-          <select id="form-category" onchange="updateFormFields()" class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-100 dark:bg-clinical-850 border border-slate-200 dark:border-slate-700 outline-none focus:border-teal-500">
-            <option value="questions">02_Anestezi_Soru_Havuzu (Soru Bankası / Çıkmışlar)</option>
-            <option value="notes">03_Ders_Notlari_ve_Ozetler (Ders Notu / PDF / Özet)</option>
-            <option value="cases">04_Klinik_Vaka_Havuzu (Cerrahi Branş Vakası)</option>
-            <option value="media">05_Gorsel_Arsiv (Görsel / Video / Cihaz Bağlantısı)</option>
-          </select>
-        </div>
-
-        <!-- Dinamik Alt Alanlar Buraya Render Edilir -->
-        <div id="dynamic-form-fields" class="space-y-4"></div>
-
-        <div class="pt-2 flex items-center justify-end gap-2.5 border-t border-slate-200 dark:border-slate-800">
-          <button type="button" onclick="closeModal('add-modal')" class="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-clinical-800">
-            İptal
-          </button>
-          <button type="submit" class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-teal-600 hover:bg-teal-500 text-white shadow-lg shadow-teal-600/20 flex items-center gap-2">
-            <i data-lucide="check" class="w-4 h-4"></i>
-            <span>Arşive Kaydet</span>
-          </button>
-        </div>
-      </form>
+    <div class="sidebar-footer">
+      <button class="btn-sm" onclick="exportJSON()">⬇️ Yedekle</button>
+      <button class="btn-sm" onclick="document.getElementById('importFile').click()">⬆️ Yükle</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
     </div>
-  </div>
+  </aside>
 
-  <!-- ===================================================================== -->
-  <!-- MODAL 3: VAKA / MEDYA DETAY VE ÖNİZLEME MODALI                        -->
-  <!-- ===================================================================== -->
-  <div id="preview-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs">
-    <div class="bg-white dark:bg-clinical-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl fade-in">
-      <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
-        <h3 id="pm-title" class="font-display font-bold text-lg text-slate-900 dark:text-white truncate">Detay</h3>
-        <button onclick="closeModal('preview-modal')" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-clinical-800">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+  <!-- Ana İçerik Alanı -->
+  <main class="main">
+    <header class="topbar">
+      <button class="menu-btn" onclick="toggleSidebar(true)">☰</button>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Ders, çıkmış soru, vaka, cihaz veya açıklama ara..." oninput="renderContent()">
       </div>
-      <div id="pm-body" class="p-5 overflow-y-auto flex-1 space-y-4"></div>
+      <button class="btn-primary" onclick="openModal()">+ İçerik Ekle</button>
+    </header>
+
+    <div class="container" id="appContent"></div>
+
+    <footer>
+      Kocaeli Üniversitesi SHMYO Anestezi Programı • Dijital Arşiv Sistemi
+    </footer>
+  </main>
+
+  <!-- İçerik Ekleme Modalı -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <h3>Arşive Yeni İçerik Ekle</h3>
+      <div class="form-group">
+        <label>Klasör / Kategori</label>
+        <select id="fCategory" onchange="updateSubOptions()">
+          <option value="soru">02_Anestezi_Soru_Havuzu</option>
+          <option value="not">03_Ders_Notlari_ve_Ozetler</option>
+          <option value="vaka">04_Klinik_Vaka_Havuzu</option>
+          <option value="gorsel">05_Gorsel_Arsiv</option>
+        </select>
+      </div>
+      <div class="form-group" id="classGroup">
+        <label>Sınıf Düzeyi</label>
+        <select id="fClass" onchange="updateSubOptions()">
+          <option value="1">1. Sınıf</option>
+          <option value="2">2. Sınıf</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label id="subLabel">Ders Seçimi</label>
+        <select id="fSub"></select>
+      </div>
+      <div class="form-group">
+        <label>Başlık</label>
+        <input type="text" id="fTitle" placeholder="Örn: 2025 Vize Çıkmış Sorular / Laringoskopi Videosu">
+      </div>
+      <div class="form-group">
+        <label>Açıklama / Klinik Özet / Hoca Notu</label>
+        <textarea id="fDesc" rows="3" placeholder="İçerik hakkında kısa açıklama veya önemli noktalar..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Google Drive veya Video Bağlantısı (Link)</label>
+        <input type="url" id="fLink" placeholder="https://drive.google.com/... veya https://youtu.be/...">
+      </div>
+      <div class="form-group">
+        <label>Ekleyen / Dönem</label>
+        <input type="text" id="fAuthor" placeholder="Örn: Mücahit K. - 2. Sınıf">
+      </div>
+      <div class="modal-actions">
+        <button class="btn-sm" onclick="closeModal()">İptal</button>
+        <button class="btn-primary" onclick="saveItem()">Kaydet</button>
+      </div>
     </div>
   </div>
 
   <script>
-    // =========================================================================
-    // 1. SABİT MÜFREDAT VE BRANŞ TANIMLARI (Kullanıcının Birebir Listesi)
-    // =========================================================================
     const CURRICULUM = {
-      year1: [
-        { id: 'y1_cihaz', name: 'Anestezi Cihaz ve Ekipmanları', credit: '5 AKTS', icon: 'cpu', tag: 'Temel Teknik' },
-        { id: 'y1_reanimasyon', name: 'Anestezi ve Reanimasyon', credit: '5 AKTS', icon: 'heart-pulse', tag: 'Kritik Ders' },
-        { id: 'y1_fizyoloji', name: 'Fizyoloji', credit: '5 AKTS', icon: 'activity', tag: 'Temel Tıp' },
-        { id: 'y1_terminoloji', name: 'Tıbbi Terminoloji', credit: '2 AKTS', icon: 'book-a', tag: 'Latince & Terim' },
-        { id: 'y1_anatomi', name: 'Anatomi', credit: '4 AKTS', icon: 'bone', tag: 'Temel Tıp' },
-        { id: 'y1_farmakoloji', name: 'Farmakoloji', credit: '4 AKTS', icon: 'pill', tag: 'İlaç Bilimi' },
-        { id: 'y1_postop', name: 'Post-op Bakım', credit: '4 AKTS', icon: 'bed', tag: 'Derlenme & Bakım' },
-        { id: 'y1_klinik1', name: 'Klinik Anestezi 1', credit: '5 AKTS', icon: 'ste
+      "1": [
+        "Anestezi Cihaz ve Ekipmanları",
+        "Anestezi ve Reanimasyon",
+        "Fizyoloji",
+        "Tıbbi Terminoloji",
+        "Anatomi",
+        "Farmakoloji",
+        "Post-op Bakım",
+        "Klinik Anestezi 1",
+        "Sistem Hastalıkları",
+        "Enfeksiyon Hastalıkları"
+      ],
+      "2": [
+        "Mesleki Uygulama",
+        "Özellikli Cerrahilerde Anestezi",
+        "Anestezi Uygulamaları",
+        "Klinik Anestezi 2"
+      ]
+    };
+
+    const SURGICAL_BRANCHES = [
+      "Genel Cerrahi",
+      "Ortopedi ve Travmatoloji",
+      "Beyin ve Sinir Cerrahisi (Nöroşirürji)",
+      "Kalp ve Damar Cerrahisi (KVC)",
+      "Göğüs Cerrahisi",
+      "Kadın Hastalıkları ve Doğum",
+      "Üroloji",
+      "Kulak Burun Boğaz (KBB)",
+      "Plastik, Rekonstrüktif ve Estetik Cerrahi",
+      "Çocuk Cerrahisi (Pediatrik Anestezi)"
+    ];
+
+    const FOLDERS = [
+      { id: "yonerge", code: "01", name: "01_Arsiv_Hakkinda_ve_Yonerge" },
+      { id: "soru",    code: "02", name: "02_Anestezi_Soru_Havuzu" },
+      { id: "not",     code: "03", name: "03_Ders_Notlari_ve_Ozetler" },
+      { id: "vaka",    code: "04", name: "04_Klinik_Vaka_Havuzu" },
+      { id: "gorsel",  code: "05", name: "05_Gorsel_Arsiv" }
+    ];
+
+    const DEFAULT_ITEMS = [
+      {
+        id: 1, category: "soru", classLevel: "1", sub: "Anestezi ve Reanimasyon",
+        title: "Vize & Final Çıkmış Soru Derlemesi",
+        desc: "Temel yaşam desteği, havayolu açıklığı sağlama ve monitörizasyon konularını kapsayan geçmiş dönem soruları.",
+        link: "https://drive.google.com", author: "Arşiv Ekibi"
+      },
+      {
+        id: 2, category: "not", classLevel: "1", sub: "Anestezi Cihaz ve Ekipmanları",
+        title: "Anestezi Cihazı Devreleri ve Vaporizatörler Özeti",
+        desc: "Yarı kapalı sistemler, soda-lime kimyası ve ajan spesifik vaporizatörlerin çalışma prensipleri.",
+        link: "https://drive.google.com", author: "Arşiv Ekibi"
+      },
+      {
+        id: 3, category: "not", classLevel: "2", sub: "Özellikli Cerrahilerde Anestezi",
+        title: "Laparoskopik ve Nöroşirürji Cerrahilerinde Anestezi Yönetimi",
+        desc: "Pnömoperitonyumun fizyolojik etkileri ve kafa içi basıncını (KİB) etkileyen anestezik ajanlar.",
+        link: "https://drive.google.com", author: "Arşiv Ekibi"
+      },
+      {
+        id: 4, category: "vaka", classLevel: "", sub: "Genel Cerrahi",
+        title: "ASA III Acil İleus Vakası – Hızlı Seri İndüksiyon (RSI)",
+        desc: "Dolu mide aspirasyon riski bulunan hastada Sellick manevrası, süksinilkolin/roküronyum seçimi ve sıvı resüsitasyonu.",
+        link: "https://drive.google.com", author: "Klinik Staj Notu"
+      },
+      {
+        id: 5, category: "gorsel", classLevel: "", sub: "Havayolu & Ekipman",
+        title: "Video Laringoskopi ve Zor Entübasyon Algoritması",
+        desc: "Mallampati III-IV hastalarda blade seçimi, stile kullanımı ve kapnografi doğrulama görselleri.",
+        link: "https://drive.google.com", author: "Görsel Arşiv"
+      }
+    ];
+
+    let items = JSON.parse(localStorage.getItem("kou_anestezi_items")) || DEFAULT_ITEMS;
+    let activeFolder = "soru";
+    let activeClass = "1";
+    let selectedSub = null;
+
+    function toggleSidebar(show) {
+      document.getElementById("sidebar").classList.toggle("open", show);
+      document.getElementById("overlay").classList.toggle("show", show);
+    }
+
+    function renderSidebar() {
+      const nav = document.getElementById("navList");
+      nav.innerHTML = FOLDERS.map(f => {
+        const count = f.id === "yonerge" ? "Bilgi" : items.filter(i => i.category === f.id).length;
+        return `
+          <button class="nav-item ${activeFolder === f.id ? 'active' : ''}" onclick="selectFolder('${f.id}')">
+            <span class="nav-left">
+              <span>📁</span>
+              <span class="nav-title">${f.name}</span>
+            </span>
+            <span class="badge">${count}</span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function selectFolder(id) {
+      activeFolder = id;
+      selectedSub = null;
+      document.getElementById("searchInput").value = "";
+      toggleSidebar(false);
+      renderSidebar();
+      renderContent();
+    }
+
+    function selectClass(cls) {
+      activeClass = cls;
+      selectedSub = null;
+      renderContent();
+    }
+
+    function selectSub(sub) {
+      selectedSub = sub;
+      renderContent();
+    }
+
+    function renderContent() {
+      const container = document.getElementById("appContent");
+      const query = document.getElementById("searchInput").value.trim().toLowerCase();
+
+      // Arama yapılıyorsa tüm arşivde filtrele
+      if (query) {
+        const filtered = items.filter(i =>
+          i.title.toLowerCase().includes(query) ||
+          i.desc.toLowerCase().includes(query) ||
+          i.sub.toLowerCase().includes(query)
+        );
+        container.innerHTML = `
+          <div class="header-box">
+            <h2>Arama Sonuçları ("${query}")</h2>
+            <p>${filtered.length} kayıt bulundu</p>
+          </div>
+          ${renderItemCards(filtered)}
+        `;
+        return;
+      }
+
+      // 01 Yönerge
+      if (activeFolder === "yonerge") {
+        container.innerHTML = `
+          <div class="header-box">
+            <h2>01_Arsiv_Hakkinda_ve_Yonerge</h2>
+            <p>Kocaeli Üniversitesi SHMYO Anestezi Programı Ortak Bilgi ve Kaynak Sistemi</p>
+          </div>
+          <div class="info-panel">
+            <h3>Sistemin Amacı ve Kullanım Kuralları</h3>
+            <p style="font-size:0.88rem; color:var(--text-muted);">
+              Bu dijital arşiv; 1. ve 2. sınıf öğrencilerinin ders notlarına, çıkmış sınav sorularına, klinik vaka analizlerine ve görsel eğitim materyallerine tek merkezden ulaşması için oluşturulmuştur.
+            </p>
+            <ul>
+              <li><strong>Klasör Yapısı:</strong> Tüm içerikler Google Drive ana diziniyle birebir uyumlu olarak 5 ana başlıkta toplanmıştır.</li>
+              <li><strong>İçerik Ekleme:</strong> Sağ üstteki <em>"+ İçerik Ekle"</em> butonunu kullanarak ilgili dersin veya branşın altına Drive dosya/video linki ekleyebilirsiniz.</li>
+              <li><strong>KVKK ve Hasta Gizliliği:</strong> Klinik vaka havuzuna eklenen hiçbir vakada hasta adı, T.C. kimlik veya protokol numarası paylaşılmamalıdır.</li>
+              <li><strong>Yedekleme ve Paylaşım:</strong> Sol alt menüdeki <em>"Yedekle"</em> butonu ile güncel veritabanını JSON formatında indirip temsilci ekibiyle paylaşabilirsiniz.</li>
+            </ul>
+          </div>
+        `;
+        return;
+      }
+
+      // 02 Soru Havuzu ve 03 Ders Notları (1. ve 2. Sınıf Ayrımı)
+      if (activeFolder === "soru" || activeFolder === "not") {
+        const folderTitle = activeFolder === "soru" ? "02_Anestezi_Soru_Havuzu" : "03_Ders_Notlari_ve_Ozetler";
+        const courses = CURRICULUM[activeClass];
+
+        if (!selectedSub) {
+          container.innerHTML = `
+            <div class="header-box">
+              <h2>${folderTitle}</h2>
+              <p>İçerikleri görüntülemek için sınıf düzeyini ve dersi seçin</p>
+            </div>
+            <div class="tabs">
+              <button class="tab ${activeClass === '1' ? 'active' : ''}" onclick="selectClass('1')">1. Sınıf Dersleri (${CURRICULUM['1'].length})</button>
+              <button class="tab ${activeClass === '2' ? 'active' : ''}" onclick="selectClass('2')">2. Sınıf Dersleri (${CURRICULUM['2'].length})</button>
+            </div>
+            <div class="grid">
+              ${courses.map(course => {
+                const count = items.filter(i => i.category === activeFolder && i.classLevel === activeClass && i.sub === course).length;
+                return `
+                  <div class="card clickable" onclick="selectSub('${course.replace(/'/g, "\\'")}')">
+                    <div class="card-top">
+                      <span class="card-title">📘 ${course}</span>
+                      <span class="tag">${activeClass}. Sınıf</span>
+                    </div>
+                    <div class="card-footer">
+                      <span>${count} içerik kayıtlı</span>
+                      <span style="color:#2dd4bf; font-weight:600;">Aç →</span>
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          `;
+        } else {
+          const filtered = items.filter(i => i.category === activeFolder && i.classLevel === activeClass && i.sub === selectedSub);
+          container.innerHTML = `
+            <button class="back-btn" onclick="selectSub(null)">← ${activeClass}. Sınıf Derslerine Dön</button>
+            <div class="header-box">
+              <h2>${selectedSub}</h2>
+              <p>${folderTitle} • ${activeClass}. Sınıf</p>
+            </div>
+            ${renderItemCards(filtered)}
+          `;
+        }
+        return;
+      }
+
+      // 04 Klinik Vaka Havuzu (Cerrahi Branşlar)
+      if (activeFolder === "vaka") {
+        if (!selectedSub) {
+          container.innerHTML = `
+            <div class="header-box">
+              <h2>04_Klinik_Vaka_Havuzu</h2>
+              <p>Ameliyathane stajı ve klinik vaka analizleri için cerrahi branş seçin</p>
+            </div>
+            <div class="grid">
+              ${SURGICAL_BRANCHES.map(branch => {
+                const count = items.filter(i => i.category === "vaka" && i.sub === branch).length;
+                return `
+                  <div class="card clickable" onclick="selectSub('${branch.replace(/'/g, "\\'")}')">
+                    <div class="card-top">
+                      <span class="card-title">🏥 ${branch}</span>
+                    </div>
+                    <div class="card-footer">
+                      <span>${count} vaka kaydı</span>
+                      <span style="color:#2dd4bf; font-weight:600;">Vakaları Gör →</span>
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          `;
+        } else {
+          const filtered = items.filter(i => i.category === "vaka" && i.sub === selectedSub);
+          container.innerHTML = `
+            <button class="back-btn" onclick="selectSub(null)">← Cerrahi Branşlara Dön</button>
+            <div class="header-box">
+              <h2>${selectedSub}</h2>
+              <p>04_Klinik_Vaka_Havuzu</p>
+            </div>
+            ${renderItemCards(filtered)}
+          `;
+        }
+        return;
+      }
+
+      // 05 Görsel Arşiv
+      if (activeFolder === "gorsel") {
+        const filtered = items.filter(i => i.category === "gorsel");
+        container.innerHTML = `
+          <div class="header-box">
+            <h2>05_Gorsel_Arsiv</h2>
+            <p>Cihaz kurulumları, entübasyon videoları, EKG örnekleri ve açıklamalı görsel materyaller</p>
+          </div>
+          ${renderItemCards(filtered)}
+        `;
+      }
+    }
+
+    function renderItemCards(list) {
+      if (!list.length) {
+        return `<div class="info-panel"><p style="color:var(--text-muted); font-size:0.9rem;">Bu bölümde henüz kayıtlı içerik yok. Sağ üstteki <strong>"+ İçerik Ekle"</strong> butonunu kullanarak ilk kaynağı ekleyebilirsiniz.</p></div>`;
+      }
+      return `
+        <div class="grid">
+          ${list.map(item => `
+            <div class="card">
+              <div>
+                <div class="card-top">
+                  <span class="card-title">${item.title}</span>
+                  <span class="tag">${item.sub}</span>
+                </div>
+                <p class="card-desc">${item.desc || "Açıklama girilmemiş."}</p>
+              </div>
+              <div class="card-footer">
+                <span>${item.author || "Arşiv"}</span>
+                <div style="display:flex; gap:0.75rem; align-items:center;">
+                  ${item.link ? `<a href="${item.link}" target="_blank" class="link-btn">Dosyayı Aç ↗</a>` : ''}
+                  <button class="del-btn" onclick="deleteItem(${item.id})">Sil</button>
+                </div>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    // Modal İşlemleri
+    function openModal() {
+      if (activeFolder !== "yonerge") {
+        document.getElementById("fCategory").value = activeFolder;
+      }
+      document.getElementById("fClass").value = activeClass;
+      updateSubOptions();
+      if (selectedSub) {
+        document.getElementById("fSub").value = selectedSub;
+      }
+      document.getElementById("modalBackdrop").classList.add("open");
+    }
+
+    function closeModal() {
+      document.getElementById("modalBackdrop").classList.remove("open");
+    }
+
+    function updateSubOptions() {
+      const cat = document.getElementById("fCategory").value;
+      const clsGroup = document.getElementById("classGroup");
+      const subSelect = document.getElementById("fSub");
+      const subLabel = document.getElementById("subLabel");
+
+      if (cat === "soru" || cat === "not") {
+        clsGroup.style.display = "block";
+        subLabel.textContent = "Ders Seçimi";
+        const cls = document.getElementById("fClass").value;
+        subSelect.innerHTML = CURRICULUM[cls].map(c => `<option value="${c}">${c}</option>`).join("");
+      } else if (cat === "vaka") {
+        clsGroup.style.display = "none";
+        subLabel.textContent = "Cerrahi Branş";
+        subSelect.innerHTML = SURGICAL_BRANCHES.map(b => `<option value="${b}">${b}</option>`).join("");
+      } else {
+        clsGroup.style.display = "none";
+        subLabel.textContent = "Materyal Türü";
+        subSelect.innerHTML = `
+          <option value="Cihaz & Ekipman">Cihaz & Ekipman</option>
+          <option value="Havayolu & Entübasyon">Havayolu & Entübasyon</option>
+          <option value="Monitörizasyon & EKG">Monitörizasyon & EKG</option>
+          <option value="Uygulama Videosu">Uygulama Videosu</option>
+          <option value="Diğer Görsel">Diğer Görsel</option>
+        `;
+      }
+    }
+
+    function saveItem() {
+      const category = document.getElementById("fCategory").value;
+      const classLevel = (category === "soru" || category === "not") ? document.getElementById("fClass").value : "";
+      const sub = document.getElementById("fSub").value;
+      const title = document.getElementById("fTitle").value.trim();
+      const desc = document.getElementById("fDesc").value.trim();
+      const link = document.getElementById("fLink").value.trim();
+      const author = document.getElementById("fAuthor").value.trim();
+
+      if (!title) {
+        alert("Lütfen bir başlık girin.");
+        return;
+      }
+
+      items.unshift({ id: Date.now(), category, classLevel, sub, title, desc, link, author });
+      localStorage.setItem("kou_anestezi_items", JSON.stringify(items));
+
+      document.getElementById("fTitle").value = "";
+      document.getElementById("fDesc").value = "";
+      document.getElementById("fLink").value = "";
+      closeModal();
+
+      activeFolder = category;
+      if (classLevel) activeClass = classLevel;
+      selectedSub = sub;
+      renderSidebar();
+      renderContent();
+    }
+
+    function deleteItem(id) {
+      if (!confirm("Bu kaydı silmek istediğinize emin misiniz?")) return;
+      items = items.filter(i => i.id !== id);
+      localStorage.setItem("kou_anestezi_items", JSON.stringify(items));
+      renderSidebar();
+      renderContent();
+    }
+
+    function exportJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(items, null, 2));
+      const a = document.createElement("a");
+      a.href = dataStr;
+      a.download = "kou_anestezi_arsiv_yedek.json";
+      a.click();
+    }
+
+    function importJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            items = imported;
+            localStorage.setItem("kou_anestezi_items", JSON.stringify(items));
+            renderSidebar();
+            renderContent();
+            alert("Arşiv başarıyla güncellendi!");
+          }
+        } catch (err) {
+          alert("Geçersiz JSON dosyası.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Başlangıç
+    renderSidebar();
+    renderContent();
+  </script>
+</body>
+</html>
