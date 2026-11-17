@@ -17,10 +17,7 @@
       --accent: #0d9488;
       --accent-hover: #0f766e;
       --accent-soft: rgba(13, 148, 136, 0.15);
-      --blue: #3b82f6;
-      --purple: #a855f7;
-      --amber: #f59e0b;
-      --rose: #f43f5e;
+      --danger: #f43f5e;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -53,11 +50,12 @@
     .nav-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .badge { font-size: 0.7rem; background: var(--bg-card); color: var(--text-muted); padding: 2px 7px; border-radius: 99px; }
 
-    .sidebar-footer { padding: 0.85rem; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .sidebar-footer { padding: 0.85rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.5rem; }
+    .sync-status { font-size: 0.72rem; color: var(--text-muted); text-align: center; }
     .btn-sm {
       background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main);
       padding: 0.55rem; border-radius: 7px; font-size: 0.75rem; font-weight: 600; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 0.35rem;
+      display: flex; align-items: center; justify-content: center; gap: 0.35rem; width: 100%;
     }
     .btn-sm:hover { background: var(--bg-card-hover); }
 
@@ -82,6 +80,7 @@
       font-size: 0.85rem; font-weight: 600; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 0.4rem;
     }
     .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
     .container { padding: 1.5rem; max-width: 1200px; width: 100%; margin: 0 auto; flex: 1; }
     .header-box { margin-bottom: 1.25rem; }
@@ -111,7 +110,7 @@
     .card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 0.65rem; border-top: 1px solid rgba(51,65,85,0.6); font-size: 0.75rem; color: var(--text-muted); }
     .link-btn { color: #2dd4bf; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
     .link-btn:hover { text-decoration: underline; }
-    .del-btn { background: none; border: none; color: #f43f5e; cursor: pointer; font-size: 0.75rem; opacity: 0.8; }
+    .del-btn { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 0.75rem; opacity: 0.85; }
     .del-btn:hover { opacity: 1; text-decoration: underline; }
 
     .back-btn {
@@ -119,7 +118,6 @@
       padding: 0.45rem 0.85rem; border-radius: 7px; font-size: 0.8rem; cursor: pointer; margin-bottom: 1rem; display: inline-flex; align-items: center; gap: 0.4rem;
     }
 
-    /* Info Box (01 Yönerge) */
     .info-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; line-height: 1.6; }
     .info-panel h3 { color: #2dd4bf; font-size: 1.05rem; margin-bottom: 0.5rem; }
     .info-panel ul { padding-left: 1.25rem; color: var(--text-muted); font-size: 0.88rem; margin-top: 0.5rem; }
@@ -127,7 +125,7 @@
 
     /* Modal */
     .modal-backdrop {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.78); display: none; align-items: center;
       justify-content: center; padding: 1rem; z-index: 100;
     }
     .modal-backdrop.open { display: flex; }
@@ -161,7 +159,7 @@
 
   <div class="overlay" id="overlay" onclick="toggleSidebar(false)"></div>
 
-  <!-- Sol Menü (Drive Klasör Yapısı) -->
+  <!-- Sol Menü -->
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="brand-icon">KOÜ</div>
@@ -174,13 +172,12 @@
     <nav class="nav-list" id="navList"></nav>
 
     <div class="sidebar-footer">
-      <button class="btn-sm" onclick="exportJSON()">⬇️ Yedekle</button>
-      <button class="btn-sm" onclick="document.getElementById('importFile').click()">⬆️ Yükle</button>
-      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+      <div class="sync-status" id="syncStatus">Veritabanı bağlanıyor...</div>
+      <button class="btn-sm" onclick="fetchItems()">🔄 Listeyi Yenile</button>
     </div>
   </aside>
 
-  <!-- Ana İçerik Alanı -->
+  <!-- Ana İçerik -->
   <main class="main">
     <header class="topbar">
       <button class="menu-btn" onclick="toggleSidebar(true)">☰</button>
@@ -193,7 +190,7 @@
     <div class="container" id="appContent"></div>
 
     <footer>
-      Kocaeli Üniversitesi SHMYO Anestezi Programı • Dijital Arşiv Sistemi
+      Kocaeli Üniversitesi SHMYO Anestezi Programı • Canlı Dijital Arşiv Sistemi
     </footer>
   </main>
 
@@ -237,14 +234,20 @@
         <label>Ekleyen / Dönem</label>
         <input type="text" id="fAuthor" placeholder="Örn: Mücahit K. - 2. Sınıf">
       </div>
+      <div class="form-group">
+        <label style="color:#2dd4bf; font-weight:600;">Editör Yetki Şifresi *</label>
+        <input type="password" id="fPassword" placeholder="Editör şifresini girin">
+      </div>
       <div class="modal-actions">
-        <button class="btn-sm" onclick="closeModal()">İptal</button>
-        <button class="btn-primary" onclick="saveItem()">Kaydet</button>
+        <button class="btn-sm" style="width:auto; padding:0.6rem 1rem;" onclick="closeModal()">İptal</button>
+        <button class="btn-primary" id="saveBtn" onclick="saveItem()">Canlı Arşive Kaydet</button>
       </div>
     </div>
   </div>
 
   <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbw48prKjCXcj5Xgl1DsEoCoFTZmIDurAX1eVwhoSAUgWwFXRmkSzmRz9YlY0mP86CY58A/exec";
+
     const CURRICULUM = {
       "1": [
         "Anestezi Cihaz ve Ekipmanları",
@@ -287,43 +290,36 @@
       { id: "gorsel",  code: "05", name: "05_Gorsel_Arsiv" }
     ];
 
-    const DEFAULT_ITEMS = [
-      {
-        id: 1, category: "soru", classLevel: "1", sub: "Anestezi ve Reanimasyon",
-        title: "Vize & Final Çıkmış Soru Derlemesi",
-        desc: "Temel yaşam desteği, havayolu açıklığı sağlama ve monitörizasyon konularını kapsayan geçmiş dönem soruları.",
-        link: "https://drive.google.com", author: "Arşiv Ekibi"
-      },
-      {
-        id: 2, category: "not", classLevel: "1", sub: "Anestezi Cihaz ve Ekipmanları",
-        title: "Anestezi Cihazı Devreleri ve Vaporizatörler Özeti",
-        desc: "Yarı kapalı sistemler, soda-lime kimyası ve ajan spesifik vaporizatörlerin çalışma prensipleri.",
-        link: "https://drive.google.com", author: "Arşiv Ekibi"
-      },
-      {
-        id: 3, category: "not", classLevel: "2", sub: "Özellikli Cerrahilerde Anestezi",
-        title: "Laparoskopik ve Nöroşirürji Cerrahilerinde Anestezi Yönetimi",
-        desc: "Pnömoperitonyumun fizyolojik etkileri ve kafa içi basıncını (KİB) etkileyen anestezik ajanlar.",
-        link: "https://drive.google.com", author: "Arşiv Ekibi"
-      },
-      {
-        id: 4, category: "vaka", classLevel: "", sub: "Genel Cerrahi",
-        title: "ASA III Acil İleus Vakası – Hızlı Seri İndüksiyon (RSI)",
-        desc: "Dolu mide aspirasyon riski bulunan hastada Sellick manevrası, süksinilkolin/roküronyum seçimi ve sıvı resüsitasyonu.",
-        link: "https://drive.google.com", author: "Klinik Staj Notu"
-      },
-      {
-        id: 5, category: "gorsel", classLevel: "", sub: "Havayolu & Ekipman",
-        title: "Video Laringoskopi ve Zor Entübasyon Algoritması",
-        desc: "Mallampati III-IV hastalarda blade seçimi, stile kullanımı ve kapnografi doğrulama görselleri.",
-        link: "https://drive.google.com", author: "Görsel Arşiv"
-      }
-    ];
-
-    let items = JSON.parse(localStorage.getItem("kou_anestezi_items")) || DEFAULT_ITEMS;
+    let items = [];
+    let isLoading = true;
     let activeFolder = "soru";
     let activeClass = "1";
     let selectedSub = null;
+
+    async function fetchItems() {
+      const statusEl = document.getElementById("syncStatus");
+      statusEl.textContent = "Veriler güncelleniyor...";
+      isLoading = true;
+      renderContent();
+
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          items = data;
+          localStorage.setItem("kou_anestezi_cache", JSON.stringify(items));
+          statusEl.textContent = "🟢 Canlı Bağlantı Aktif (" + items.length + " kayıt)";
+        }
+      } catch (err) {
+        const cached = localStorage.getItem("kou_anestezi_cache");
+        items = cached ? JSON.parse(cached) : [];
+        statusEl.textContent = "🟡 Çevrimdışı Önbellek Gösteriliyor";
+      } finally {
+        isLoading = false;
+        renderSidebar();
+        renderContent();
+      }
+    }
 
     function toggleSidebar(show) {
       document.getElementById("sidebar").classList.toggle("open", show);
@@ -370,12 +366,16 @@
       const container = document.getElementById("appContent");
       const query = document.getElementById("searchInput").value.trim().toLowerCase();
 
-      // Arama yapılıyorsa tüm arşivde filtrele
+      if (isLoading && items.length === 0 && activeFolder !== "yonerge") {
+        container.innerHTML = `<div class="info-panel"><p style="color:#2dd4bf;">⏳ Google E-Tablo veritabanından güncel kayıtlar çekiliyor...</p></div>`;
+        return;
+      }
+
       if (query) {
         const filtered = items.filter(i =>
-          i.title.toLowerCase().includes(query) ||
-          i.desc.toLowerCase().includes(query) ||
-          i.sub.toLowerCase().includes(query)
+          (i.title || "").toLowerCase().includes(query) ||
+          (i.desc || "").toLowerCase().includes(query) ||
+          (i.sub || "").toLowerCase().includes(query)
         );
         container.innerHTML = `
           <div class="header-box">
@@ -387,7 +387,6 @@
         return;
       }
 
-      // 01 Yönerge
       if (activeFolder === "yonerge") {
         container.innerHTML = `
           <div class="header-box">
@@ -400,17 +399,16 @@
               Bu dijital arşiv; 1. ve 2. sınıf öğrencilerinin ders notlarına, çıkmış sınav sorularına, klinik vaka analizlerine ve görsel eğitim materyallerine tek merkezden ulaşması için oluşturulmuştur.
             </p>
             <ul>
-              <li><strong>Klasör Yapısı:</strong> Tüm içerikler Google Drive ana diziniyle birebir uyumlu olarak 5 ana başlıkta toplanmıştır.</li>
-              <li><strong>İçerik Ekleme:</strong> Sağ üstteki <em>"+ İçerik Ekle"</em> butonunu kullanarak ilgili dersin veya branşın altına Drive dosya/video linki ekleyebilirsiniz.</li>
+              <li><strong>Canlı Veritabanı:</strong> Tüm kayıtlar Google E-Tablolar altyapısı üzerinden anlık olarak senkronize edilir.</li>
+              <li><strong>Klasör Yapısı:</strong> İçerikler Google Drive ana diziniyle birebir uyumlu olarak 5 ana başlıkta toplanmıştır.</li>
+              <li><strong>İçerik Ekleme Yetkisi:</strong> Sağ üstteki <em>"+ İçerik Ekle"</em> butonu yalnızca editör şifresine sahip sınıf temsilcileri tarafından kullanılabilir.</li>
               <li><strong>KVKK ve Hasta Gizliliği:</strong> Klinik vaka havuzuna eklenen hiçbir vakada hasta adı, T.C. kimlik veya protokol numarası paylaşılmamalıdır.</li>
-              <li><strong>Yedekleme ve Paylaşım:</strong> Sol alt menüdeki <em>"Yedekle"</em> butonu ile güncel veritabanını JSON formatında indirip temsilci ekibiyle paylaşabilirsiniz.</li>
             </ul>
           </div>
         `;
         return;
       }
 
-      // 02 Soru Havuzu ve 03 Ders Notları (1. ve 2. Sınıf Ayrımı)
       if (activeFolder === "soru" || activeFolder === "not") {
         const folderTitle = activeFolder === "soru" ? "02_Anestezi_Soru_Havuzu" : "03_Ders_Notlari_ve_Ozetler";
         const courses = CURRICULUM[activeClass];
@@ -427,7 +425,7 @@
             </div>
             <div class="grid">
               ${courses.map(course => {
-                const count = items.filter(i => i.category === activeFolder && i.classLevel === activeClass && i.sub === course).length;
+                const count = items.filter(i => i.category === activeFolder && String(i.classLevel) === activeClass && i.sub === course).length;
                 return `
                   <div class="card clickable" onclick="selectSub('${course.replace(/'/g, "\\'")}')">
                     <div class="card-top">
@@ -444,7 +442,7 @@
             </div>
           `;
         } else {
-          const filtered = items.filter(i => i.category === activeFolder && i.classLevel === activeClass && i.sub === selectedSub);
+          const filtered = items.filter(i => i.category === activeFolder && String(i.classLevel) === activeClass && i.sub === selectedSub);
           container.innerHTML = `
             <button class="back-btn" onclick="selectSub(null)">← ${activeClass}. Sınıf Derslerine Dön</button>
             <div class="header-box">
@@ -457,7 +455,6 @@
         return;
       }
 
-      // 04 Klinik Vaka Havuzu (Cerrahi Branşlar)
       if (activeFolder === "vaka") {
         if (!selectedSub) {
           container.innerHTML = `
@@ -496,7 +493,6 @@
         return;
       }
 
-      // 05 Görsel Arşiv
       if (activeFolder === "gorsel") {
         const filtered = items.filter(i => i.category === "gorsel");
         container.innerHTML = `
@@ -511,7 +507,7 @@
 
     function renderItemCards(list) {
       if (!list.length) {
-        return `<div class="info-panel"><p style="color:var(--text-muted); font-size:0.9rem;">Bu bölümde henüz kayıtlı içerik yok. Sağ üstteki <strong>"+ İçerik Ekle"</strong> butonunu kullanarak ilk kaynağı ekleyebilirsiniz.</p></div>`;
+        return `<div class="info-panel"><p style="color:var(--text-muted); font-size:0.9rem;">Bu bölümde henüz kayıtlı içerik yok. Editör şifrenizle sağ üstteki <strong>"+ İçerik Ekle"</strong> butonunu kullanarak ilk kaynağı ekleyebilirsiniz.</p></div>`;
       }
       return `
         <div class="grid">
@@ -528,7 +524,7 @@
                 <span>${item.author || "Arşiv"}</span>
                 <div style="display:flex; gap:0.75rem; align-items:center;">
                   ${item.link ? `<a href="${item.link}" target="_blank" class="link-btn">Dosyayı Aç ↗</a>` : ''}
-                  <button class="del-btn" onclick="deleteItem(${item.id})">Sil</button>
+                  <button class="del-btn" onclick="deleteItem('${item.id}')">Sil</button>
                 </div>
               </div>
             </div>
@@ -537,7 +533,6 @@
       `;
     }
 
-    // Modal İşlemleri
     function openModal() {
       if (activeFolder !== "yonerge") {
         document.getElementById("fCategory").value = activeFolder;
@@ -582,7 +577,7 @@
       }
     }
 
-    function saveItem() {
+    async function saveItem() {
       const category = document.getElementById("fCategory").value;
       const classLevel = (category === "soru" || category === "not") ? document.getElementById("fClass").value : "";
       const sub = document.getElementById("fSub").value;
@@ -590,67 +585,72 @@
       const desc = document.getElementById("fDesc").value.trim();
       const link = document.getElementById("fLink").value.trim();
       const author = document.getElementById("fAuthor").value.trim();
+      const password = document.getElementById("fPassword").value.trim();
 
-      if (!title) {
-        alert("Lütfen bir başlık girin.");
-        return;
-      }
+      if (!title) { alert("Lütfen bir başlık girin."); return; }
+      if (!password) { alert("Lütfen editör yetki şifresini girin."); return; }
 
-      items.unshift({ id: Date.now(), category, classLevel, sub, title, desc, link, author });
-      localStorage.setItem("kou_anestezi_items", JSON.stringify(items));
+      const saveBtn = document.getElementById("saveBtn");
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Kaydediliyor...";
 
-      document.getElementById("fTitle").value = "";
-      document.getElementById("fDesc").value = "";
-      document.getElementById("fLink").value = "";
-      closeModal();
+      const newItem = { id: String(Date.now()), category, classLevel, sub, title, desc, link, author };
 
-      activeFolder = category;
-      if (classLevel) activeClass = classLevel;
-      selectedSub = sub;
-      renderSidebar();
-      renderContent();
-    }
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "add", password, item: newItem })
+        });
+        const result = await res.json();
 
-    function deleteItem(id) {
-      if (!confirm("Bu kaydı silmek istediğinize emin misiniz?")) return;
-      items = items.filter(i => i.id !== id);
-      localStorage.setItem("kou_anestezi_items", JSON.stringify(items));
-      renderSidebar();
-      renderContent();
-    }
+        if (result.status === "ok") {
+          document.getElementById("fTitle").value = "";
+          document.getElementById("fDesc").value = "";
+          document.getElementById("fLink").value = "";
+          closeModal();
 
-    function exportJSON() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(items, null, 2));
-      const a = document.createElement("a");
-      a.href = dataStr;
-      a.download = "kou_anestezi_arsiv_yedek.json";
-      a.click();
-    }
-
-    function importJSON(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const imported = JSON.parse(e.target.result);
-          if (Array.isArray(imported)) {
-            items = imported;
-            localStorage.setItem("kou_anestezi_items", JSON.stringify(items));
-            renderSidebar();
-            renderContent();
-            alert("Arşiv başarıyla güncellendi!");
-          }
-        } catch (err) {
-          alert("Geçersiz JSON dosyası.");
+          activeFolder = category;
+          if (classLevel) activeClass = classLevel;
+          selectedSub = sub;
+          await fetchItems();
+        } else {
+          alert(result.message || "Şifre hatalı veya işlem reddedildi!");
         }
-      };
-      reader.readAsText(file);
+      } catch (err) {
+        alert("Sunucuya bağlanırken bir hata oluştu. İnternet bağlantınızı kontrol edin.");
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Canlı Arşive Kaydet";
+      }
     }
 
-    // Başlangıç
+    async function deleteItem(id) {
+      const password = prompt("Bu kaydı canlı veritabanından silmek için editör şifresini girin:");
+      if (!password) return;
+
+      document.getElementById("syncStatus").textContent = "Kayıt siliniyor...";
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "delete", password, id: String(id) })
+        });
+        const result = await res.json();
+
+        if (result.status === "ok") {
+          await fetchItems();
+        } else {
+          alert(result.message || "Hatalı şifre! Silme işlemi iptal edildi.");
+          document.getElementById("syncStatus").textContent = "🟢 Canlı Bağlantı Aktif";
+        }
+      } catch (err) {
+        alert("Silme işlemi sırasında bağlantı hatası oluştu.");
+      }
+    }
+
+    // Başlangıçta verileri çek
     renderSidebar();
-    renderContent();
+    fetchItems();
   </script>
 </body>
 </html>
