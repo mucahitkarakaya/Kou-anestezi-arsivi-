@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KOÜ Anestezi Dijital Arşiv | Akademik Kaynak Portalı</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            clinical: {
+              950: '#090e1a',
+              900: '#0f172a',
+              850: '#141e33',
+              800: '#1e293b',
+              700: '#334155',
+            },
+            medical: {
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Özel Kaydırma Çubuğu */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.25);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(20, 184, 166, 0.5);
+    }
+
+    /* Yumuşak Geçişler */
+    .fade-in {
+      animation: fadeIn 0.22s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-clinical-950 dark:text-slate-100 antialiased selection:bg-teal-500 selection:text-white transition-colors duration-200">
+
+  <!-- Bildirim (Toast) Alanı -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Ana Düzen Kapsayıcısı -->
+  <div class="min-h-screen flex flex-col lg:flex-row">
+
+    <!-- Mobil Üst Menü Arka Plan Karartması -->
+    <div id="sidebar-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-30 hidden lg:hidden"></div>
+
+    <!-- SOL KENAR ÇUBUĞU (SIDEBAR) -->
+    <aside id="sidebar" class="fixed lg:sticky top-0 left-0 z-40 h-screen w-72 bg-white dark:bg-clinical-900 border-r border-slate-200 dark:border-slate-800/80 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0 shrink-0">
+      
+      <!-- Marka / Başlık Alanı -->
+      <div class="p-5 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white shadow-lg shadow-teal-500/20 shrink-0">
+            <i data-lucide="activity" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 block">KOÜ MYO</span>
+            <h1 class="font-display font-bold text-base leading-tight text-slate-900 dark:text-white">Anestezi Arşiv</h1>
+          </div>
+        </div>
+        <button onclick="toggleSidebar(false)" class="lg:hidden p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Klasör Hiyerarşisi Navigasyonu -->
+      <div class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+        <div class="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+          <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>
+          <span>Arşiv Klasör Yapısı</span>
+        </div>
+
+        <button onclick="switchTab('01')" data-nav="01" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
+          <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 nav-badge">01</span>
+          <div class="truncate">
+            <div class="truncate font-semibold">Arşiv Hakkında ve Yönerge</div>
+            <div class="text-[11px] opacity-70 truncate">01_Arsiv_Hakkinda_ve_Yonerge</div>
+          </div>
+        </button>
+
+        <button onclick="switchTab('02')" data-nav="02" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
+          <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 nav-badge">02</span>
+          <div class="truncate">
+            <div class="truncate font-semibold">Anestezi Soru Havuzu</div>
+            <div class="text-[11px] opacity-70 truncate">02_Anestezi_Soru_Havuzu</div>
+          </div>
+        </button>
+
+        <button onclick="switchTab('03')" data-nav="03" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
+          <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 nav-badge">03</span>
+          <div class="truncate">
+            <div class="truncate font-semibold">Ders Notları ve Özetler</div>
+            <div class="text-[11px] opacity-70 truncate">03_Ders_Notlari_ve_Ozetler</div>
+          </div>
+        </button>
+
+        <button onclick="switchTab('04')" data-nav="04" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
+          <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 nav-badge">04</span>
+          <div class="truncate">
+            <div class="truncate font-semibold">Klinik Vaka Havuzu</div>
+            <div class="text-[11px] opacity-70 truncate">04_Klinik_Vaka_Havuzu</div>
+          </div>
+        </button>
+
+        <button onclick="switchTab('05')" data-nav="05" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium transition-all">
+          <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 nav-badge">05</span>
+          <div class="truncate">
+            <div class="truncate font-semibold">Görsel Arşiv & Medya</div>
+            <div class="text-[11px] opacity-70 truncate">05_Gorsel_Arsiv</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Alt Veri Yönetimi / Yedekleme Paneli -->
+      <div class="p-4 border-t border-slate-200 dark:border-slate-800/80 space-y-2.5 bg-slate-50/50 dark:bg-clinical-950/40">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center justify-between">
+          <span>Editör Veri Yönetimi</span>
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500" title="Tarayıcı Hafızası Aktif"></span>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="exportData()" class="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-medium bg-white dark:bg-clinical-800 border border-slate-200 dark:border-slate-700 hover:border-teal-500 dark:hover:border-teal-500 transition-colors" title="Tüm eklenen içerikleri JSON olarak indir">
+            <i data-lucide="download" class="w-3.5 h-3.5 text-teal-500"></i>
+            <span>Yedekle</span>
+          </button>
+          <label class="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-medium bg-white dark:bg-clinical-800 border border-slate-200 dark:border-slate-700 hover:border-cyan-500 dark:hover:border-cyan-500 transition-colors cursor-pointer" title="JSON yedek dosyasını yükle">
+            <i data-lucide="upload" class="w-3.5 h-3.5 text-cyan-500"></i>
+            <span>Yükle</span>
+            <input type="file" id="import-file" accept=".json" onchange="importData(event)" class="hidden" />
+          </label>
+        </div>
+      </div>
+    </aside>
+
+    <!-- SAĞ ANA İÇERİK ALANI -->
+    <div class="flex-1 flex flex-col min-w-0">
+
+      <!-- ÜST HEADER BAR -->
+      <header class="sticky top-0 z-20 bg-white/85 dark:bg-clinical-900/85 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 px-4 sm:px-6 py-3.5">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+          
+          <!-- Sol: Mobil Menü Butonu & Global Arama -->
+          <div class="flex items-center gap-3 flex-1 min-w-[220px]">
+            <button onclick="toggleSidebar(true)" class="lg:hidden p-2.5 rounded-xl bg-slate-100 dark:bg-clinical-800 text-slate-700 dark:text-slate-200">
+              <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+
+            <div class="relative flex-1 max-w-md">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input 
+                type="text" 
+                id="global-search" 
+                oninput="handleGlobalSearch(this.value)"
+                placeholder="Ders, çıkmış soru, vaka, cihaz veya açıklama ara..." 
+                class="w-full pl-10 pr-8 py-2 rounded-xl text-sm bg-slate-100 dark:bg-clinical-850 border border-transparent focus:border-teal-500 dark:focus:border-teal-500 focus:bg-white dark:focus:bg-clinical-800 outline-none transition-all placeholder:text-slate-400"
+              />
+              <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                <i data-lucide="x-circle" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Sağ: Hızlı Ekle & Tema Değiştirici -->
+          <div class="flex items-center gap-2.5">
+            <button onclick="openAddModal()" class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white shadow-md shadow-teal-600/20 transition-all active:scale-[0.98]">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              <span>İçerik Ekle</span>
+            </button>
+
+            <button onclick="toggleTheme()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-clinical-800 text-slate-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400 border border-slate-200/70 dark:border-slate-700/70 transition-colors" title="Karanlık / Aydınlık Mod">
+              <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+              <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- DİNAMİK SAYFA İÇERİĞİ -->
+      <main id="main-content" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <!-- İçerik JavaScript ile render edilir -->
+      </main>
+
+      <!-- FOOTER -->
+      <footer class="border-t border-slate-200 dark:border-slate-800/70 py-5 px-6 text-center sm:text-left">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+          <p><strong class="text-slate-700 dark:text-slate-300">Kocaeli Üniversitesi Anestezi Dijital Arşivi</strong> • Akademik Dayanışma ve Kurumsal Hafıza Platformu</p>
+          <p class="flex items-center gap-1.5">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-teal-500"></i>
+            <span>KVKK Uyumlu • Hasta Verileri Tamamen Anonimleştirilmiştir</span>
+          </p>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 1: DERS DETAY ÇEKMECESİ / MODALI (Soru Havuzu & Ders Notları)    -->
+  <!-- ===================================================================== -->
+  <div id="course-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+    <div class="bg-white dark:bg-clinical-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl w-full max-w-3xl max-h-[88vh] flex flex-col shadow-2xl fade-in">
+      <!-- Modal Üst -->
+      <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-start justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span id="cm-badge-type" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-teal-500/10 text-teal-600 dark:text-teal-400">Soru Havuzu</span>
+            <span id="cm-badge-year" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-clinical-800 text-slate-600 dark:text-slate-300">1. Sınıf</span>
+          </div>
+          <h3 id="cm-title" class="font-display font-bold text-xl text-slate-900 dark:text-white">Ders Adı</h3>
+          <p id="cm-subtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kayıtlı dökümanlar, çıkmış sorular ve çalışma bağlantıları</p>
+        </div>
+        <button onclick="closeModal('course-modal')" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-clinical-800 hover:text-slate-700 dark:hover:text-white transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Liste İçeriği -->
+      <div id="cm-list" class="p-5 overflow-y-auto flex-1 space-y-3">
+        <!-- Kayıtlar dinamik olarak buraya gelir -->
+      </div>
+
+      <!-- Modal Alt -->
+      <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-clinical-950/50 rounded-b-2xl flex items-center justify-between gap-3">
+        <span id="cm-count" class="text-xs font-medium text-slate-500 dark:text-slate-400">0 kayıt listeleniyor</span>
+        <button id="cm-add-btn" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-teal-600 hover:bg-teal-500 text-white transition-colors">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>Bu Derse Kaynak Ekle</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 2: YENİ İÇERİK EKLEME MODALI (Tüm Bölümler İçin Akıllı Form)    -->
+  <!-- ===================================================================== -->
+  <div id="add-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-xs">
+    <div class="bg-white dark:bg-clinical-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl fade-in">
+      <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+            <i data-lucide="folder-plus" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white">Arşive Yeni İçerik Ekle</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Drive linki, soru bankası, klinik vaka veya görsel/video ekleyin</p>
+          </div>
+        </div>
+        <button onclick="closeModal('add-modal')" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-clinical-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="add-form" onsubmit="handleFormSubmit(event)" class="p-5 overflow-y-auto flex-1 space-y-4">
+        <!-- Hedef Klasör Seçimi -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Hedef Arşiv Klasörü</label>
+          <select id="form-category" onchange="updateFormFields()" class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-100 dark:bg-clinical-850 border border-slate-200 dark:border-slate-700 outline-none focus:border-teal-500">
+            <option value="questions">02_Anestezi_Soru_Havuzu (Soru Bankası / Çıkmışlar)</option>
+            <option value="notes">03_Ders_Notlari_ve_Ozetler (Ders Notu / PDF / Özet)</option>
+            <option value="cases">04_Klinik_Vaka_Havuzu (Cerrahi Branş Vakası)</option>
+            <option value="media">05_Gorsel_Arsiv (Görsel / Video / Cihaz Bağlantısı)</option>
+          </select>
+        </div>
+
+        <!-- Dinamik Alt Alanlar Buraya Render Edilir -->
+        <div id="dynamic-form-fields" class="space-y-4"></div>
+
+        <div class="pt-2 flex items-center justify-end gap-2.5 border-t border-slate-200 dark:border-slate-800">
+          <button type="button" onclick="closeModal('add-modal')" class="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-clinical-800">
+            İptal
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-teal-600 hover:bg-teal-500 text-white shadow-lg shadow-teal-600/20 flex items-center gap-2">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Arşive Kaydet</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 3: VAKA / MEDYA DETAY VE ÖNİZLEME MODALI                        -->
+  <!-- ===================================================================== -->
+  <div id="preview-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs">
+    <div class="bg-white dark:bg-clinical-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl fade-in">
+      <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+        <h3 id="pm-title" class="font-display font-bold text-lg text-slate-900 dark:text-white truncate">Detay</h3>
+        <button onclick="closeModal('preview-modal')" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-clinical-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="pm-body" class="p-5 overflow-y-auto flex-1 space-y-4"></div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. SABİT MÜFREDAT VE BRANŞ TANIMLARI (Kullanıcının Birebir Listesi)
+    // =========================================================================
+    const CURRICULUM = {
+      year1: [
+        { id: 'y1_cihaz', name: 'Anestezi Cihaz ve Ekipmanları', credit: '5 AKTS', icon: 'cpu', tag: 'Temel Teknik' },
+        { id: 'y1_reanimasyon', name: 'Anestezi ve Reanimasyon', credit: '5 AKTS', icon: 'heart-pulse', tag: 'Kritik Ders' },
+        { id: 'y1_fizyoloji', name: 'Fizyoloji', credit: '5 AKTS', icon: 'activity', tag: 'Temel Tıp' },
+        { id: 'y1_terminoloji', name: 'Tıbbi Terminoloji', credit: '2 AKTS', icon: 'book-a', tag: 'Latince & Terim' },
+        { id: 'y1_anatomi', name: 'Anatomi', credit: '4 AKTS', icon: 'bone', tag: 'Temel Tıp' },
+        { id: 'y1_farmakoloji', name: 'Farmakoloji', credit: '4 AKTS', icon: 'pill', tag: 'İlaç Bilimi' },
+        { id: 'y1_postop', name: 'Post-op Bakım', credit: '4 AKTS', icon: 'bed', tag: 'Derlenme & Bakım' },
+        { id: 'y1_klinik1', name: 'Klinik Anestezi 1', credit: '5 AKTS', icon: 'ste
